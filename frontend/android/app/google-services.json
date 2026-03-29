@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "150006920909",
+    "project_id": "lims-9f7830b6",
+    "storage_bucket": "lims-9f7830b6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150006920909:android:4e90deb5db54dee6421b84",
+        "android_client_info": {
+          "package_name": "com.yourcompany.lims"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDu8Y6HPsemKVbzr0vFGm-iNYTdTw1BP8U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
