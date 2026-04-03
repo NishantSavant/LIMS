@@ -54,6 +54,26 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "user", "patient_unique_id"]
 
+class PatientProfileDetailSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer(read_only=True)
+
+    class Meta:
+        model = PatientProfile
+        fields = [
+            "id",
+            "user",
+            "patient_unique_id",
+            "full_name",
+            "date_of_birth",
+            "gender",
+            "blood_group",
+            "phone",
+            "abha_address",
+            "address",
+            "emergency_contact",
+        ]
+        read_only_fields = fields
+
 class DoctorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = DoctorProfile
@@ -70,6 +90,26 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
             'emergency_contact',
         ]
         read_only_fields = ['id', 'doctor_unique_id']
+
+class DoctorProfileDetailSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer(read_only=True)
+
+    class Meta:
+        model = DoctorProfile
+        fields = [
+            'id',
+            'user',
+            'full_name',
+            'doctor_unique_id',
+            'specialization',
+            'registration_no',
+            'date_of_birth',
+            'gender',
+            'blood_group',
+            'address',
+            'emergency_contact',
+        ]
+        read_only_fields = fields
 
 class LabProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -102,6 +142,7 @@ class SampleForReportSerializer(serializers.ModelSerializer):
 class LabReportSerializer(serializers.ModelSerializer):
     patient_name = serializers.CharField(source='patient.full_name', read_only=True)
     patient_unique_id = serializers.CharField(source='patient.patient_unique_id', read_only=True)
+    approved_by_name = serializers.CharField(source='approved_by.full_name', read_only=True)
     
     class Meta:
         model = LabReport
@@ -112,6 +153,10 @@ class LabReportSerializer(serializers.ModelSerializer):
             'results',
             'doctor_notes',
             'is_flagged',
+            'is_visible_to_patient',
+            'approved_at',
+            'approved_by',
+            'approved_by_name',
             'report_file',
             'sample',
             'report_type',

@@ -170,6 +170,29 @@ class LabReportViewSet(viewsets.ModelViewSet):
     serializer_class = LabReportSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        qs = LabReport.objects.all()
+        user = getattr(self.request, "user", None)
+        if not user or not user.is_authenticated:
+            return qs.none()
+
+        if user.role == 'patient':
+            try:
+                patient_profile = PatientProfile.objects.get(user=user)
+            except PatientProfile.DoesNotExist:
+                return qs.none()
+            return qs.filter(patient=patient_profile, is_visible_to_patient=True)
+
+        if user.role == 'doctor':
+            doctor_profile, _ = DoctorProfile.objects.get_or_create(user=user)
+            patient_ids = DoctorPatientLink.objects.filter(
+                doctor=doctor_profile,
+                status='accepted'
+            ).values_list('patient_id', flat=True)
+            return qs.filter(patient_id__in=list(patient_ids))
+
+        return qs
+
 class PrescriptionViewSet(viewsets.ModelViewSet):
     queryset = Prescription.objects.all()
     serializer_class = PrescriptionSerializer
@@ -318,6 +341,11 @@ def approve_appointment(request, pk):
         appointment.status = 'approved'
         appointment.approved_at = timezone.now()
         appointment.save()
+        _notify_patient(
+            appointment.patient,
+            'Appointment Approved',
+            f"Dr. {doctor_profile.full_name} approved your appointment request.",
+        )
         return Response({'message': '✅ Approved!'})
     except Exception as e:
         return Response({'error': str(e)}, status=400)
@@ -474,6 +502,11 @@ def lab_approve_request(request, pk):
 
     req.status = 'sample_collected'
     req.save(update_fields=['status'])
+    _notify_patient(
+        req.patient,
+        'Lab Request Approved',
+        f"{lab_profile.name} approved your lab test request.",
+    )
     return Response({'message': 'Request accepted', 'id': req.id, 'status': req.status}, status=200)
 
 
@@ -725,7 +758,8 @@ def patient_lab_reports(request):
         return Response([], status=200)
 
     reports = LabReport.objects.filter(
-        patient=patient_profile
+        patient=patient_profile,
+        is_visible_to_patient=True
     ).select_related('patient', 'sample').order_by('-created_at')
 
     serializer = LabReportSerializer(reports, many=True)
@@ -743,7 +777,14 @@ def doctor_lab_reports(request):
 
         patient_unique_id = request.GET.get('patient_id')
 
-        reports_qs = LabReport.objects.select_related('sample', 'patient').order_by('-created_at')
+        connected_patient_ids = DoctorPatientLink.objects.filter(
+            doctor=doctor_profile,
+            status='accepted'
+        ).values_list('patient_id', flat=True)
+
+        reports_qs = LabReport.objects.select_related('sample', 'patient').filter(
+            patient_id__in=list(connected_patient_ids)
+        ).order_by('-created_at')
 
         if patient_unique_id:
             # Only allow doctors to view reports of connected/accepted patients.
@@ -764,6 +805,36 @@ def doctor_lab_reports(request):
     except Exception as e:
         logger.exception('lab reports error: %s', e)
         return Response([], status=200)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsDoctor])
+def doctor_show_report_to_patient(request, report_id):
+    doctor_profile, _ = DoctorProfile.objects.get_or_create(user=request.user)
+    report = get_object_or_404(LabReport, id=report_id)
+
+    has_access = DoctorPatientLink.objects.filter(
+        doctor=doctor_profile,
+        patient=report.patient,
+        status='accepted'
+    ).exists()
+    if not has_access:
+        return Response({'error': 'Unauthorized patient access'}, status=403)
+
+    if report.is_visible_to_patient:
+        return Response({'message': 'Report already visible to patient'}, status=200)
+
+    report.is_visible_to_patient = True
+    report.approved_by = doctor_profile
+    report.approved_at = timezone.now()
+    report.save(update_fields=['is_visible_to_patient', 'approved_by', 'approved_at'])
+
+    _notify_patient(
+        report.patient,
+        'Lab Report Available',
+        f"Dr. {doctor_profile.full_name} shared a lab report.",
+    )
+    return Response(LabReportSerializer(report).data, status=200)
 
 
 # A. CREATE SAMPLE (enter patient_id → auto-generate barcode)
@@ -944,7 +1015,7 @@ def patient_stats(request):
     """Live stats for patient dashboard"""
     profile = PatientProfile.objects.get(user=request.user)
     stats = {
-        'total_reports': LabReport.objects.filter(patient=profile).count(),
+        'total_reports': LabReport.objects.filter(patient=profile, is_visible_to_patient=True).count(),
         'total_prescriptions': Prescription.objects.filter(patient=profile).count(),
     }
     return Response(stats)
@@ -1012,21 +1083,109 @@ def doctor_past_appointments(request):
     return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated, IsDoctor])
 def doctor_patient_detail(request, patient_id):
     logger.debug('doctor_patient_detail requested patient_id=%s', patient_id)
-    
+
     if not patient_id or patient_id == 'undefined':
         return Response({"error": "Invalid patient ID"}, status=400)
-    
-    try:
-        profile = PatientProfile.objects.get(patient_unique_id=patient_id)
-        logger.debug('doctor_patient_detail found patient_unique_id=%s', profile.patient_unique_id)
-        serializer = PatientProfileSerializer(profile)
-        return Response(serializer.data)
-    except PatientProfile.DoesNotExist:
-        logger.warning('doctor_patient_detail patient not found patient_id=%s', patient_id)
-        return Response({"error": f"Patient {patient_id} not found"}, status=404)
 
+    doctor_profile, _ = DoctorProfile.objects.get_or_create(user=request.user)
+    profile = get_object_or_404(PatientProfile, patient_unique_id=patient_id)
+
+    has_access = DoctorPatientLink.objects.filter(
+        doctor=doctor_profile,
+        patient=profile,
+        status='accepted'
+    ).exists()
+    if not has_access:
+        return Response({'error': 'Unauthorized patient access'}, status=403)
+
+    serializer = PatientProfileSerializer(profile)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsDoctor])
+def doctor_patient_profile(request, patient_id):
+    doctor_profile, _ = DoctorProfile.objects.get_or_create(user=request.user)
+    patient = get_object_or_404(PatientProfile, patient_unique_id=patient_id)
+
+    has_access = DoctorPatientLink.objects.filter(
+        doctor=doctor_profile,
+        patient=patient,
+        status='accepted'
+    ).exists()
+    if not has_access:
+        return Response({'error': 'Unauthorized patient access'}, status=403)
+
+    serializer = PatientProfileDetailSerializer(patient)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsDoctor])
+def doctor_patient_history(request, patient_id):
+    doctor_profile, _ = DoctorProfile.objects.get_or_create(user=request.user)
+    patient = get_object_or_404(PatientProfile, patient_unique_id=patient_id)
+
+    has_access = DoctorPatientLink.objects.filter(
+        doctor=doctor_profile,
+        patient=patient,
+        status='accepted'
+    ).exists()
+    if not has_access:
+        return Response({'error': 'Unauthorized patient access'}, status=403)
+
+    reports = LabReport.objects.filter(patient=patient).select_related('sample').order_by('-created_at')
+    cases = (PatientCase.objects
+             .filter(patient=patient)
+             .select_related('doctor')
+             .order_by('-created_at'))
+
+    case_data = [{
+        'id': case.id,
+        'doctor_name': getattr(case.doctor, 'full_name', ''),
+        'disease_name': case.disease_name,
+        'medicines_given': case.medicines_given,
+        'prescriptions': case.prescriptions,
+        'reports_required': case.reports_required,
+        'notes': case.notes,
+        'created_at': case.created_at,
+        'updated_at': case.updated_at,
+    } for case in cases]
+
+    return Response({
+        'patient': PatientProfileDetailSerializer(patient).data,
+        'reports': LabReportSerializer(reports, many=True).data,
+        'cases': case_data,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsPatient])
+def patient_doctor_profile(request, doctor_id):
+    patient_profile, _ = PatientProfile.objects.get_or_create(user=request.user)
+    doctor = get_object_or_404(DoctorProfile, doctor_unique_id=doctor_id)
+
+    has_access = DoctorPatientLink.objects.filter(
+        doctor=doctor,
+        patient=patient_profile,
+        status='accepted'
+    ).exists()
+    if not has_access:
+        return Response({'error': 'Unauthorized doctor access'}, status=403)
+
+    serializer = DoctorProfileDetailSerializer(doctor)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsLabStaff])
+def lab_patient_profile(request, patient_id):
+    patient = get_object_or_404(PatientProfile, patient_unique_id=patient_id)
+    serializer = PatientProfileDetailSerializer(patient)
+    return Response(serializer.data)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsDoctor])

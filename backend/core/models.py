@@ -192,6 +192,15 @@ class LabReport(TimestampedModel):
     results = models.JSONField(blank=True, null=True) 
     doctor_notes = models.TextField(blank=True)
     is_flagged = models.BooleanField(default=False)
+    is_visible_to_patient = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(
+        DoctorProfile,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_lab_reports',
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
 
     # 🔹 New: actual file storage for uploaded report
     report_file = models.FileField(upload_to='reports/', blank=True, null=True)

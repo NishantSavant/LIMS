@@ -27,6 +27,34 @@ interface PatientReport {
   report_type?: string;
   report_file?: string;
   is_flagged?: boolean;
+  is_visible_to_patient?: boolean;
+  approved_at?: string;
+  approved_by_name?: string;
+}
+
+interface PatientCase {
+  id: number;
+  doctor_name?: string;
+  disease_name?: string;
+  medicines_given?: string;
+  prescriptions?: string;
+  reports_required?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface PatientProfileDetail {
+  patient_unique_id?: string;
+  full_name?: string;
+  phone?: string;
+  date_of_birth?: string;
+  gender?: string;
+  blood_group?: string;
+  abha_address?: string;
+  address?: string;
+  emergency_contact?: string;
+  user?: { email?: string; username?: string };
 }
 
 const MyPatientsPage: React.FC<MyPatientsPageProps> = ({ stats = { patients: 0, requests: 0, appointments: 0, prescriptions: 0 }, profile }) => {
@@ -38,7 +66,12 @@ const MyPatientsPage: React.FC<MyPatientsPageProps> = ({ stats = { patients: 0, 
   const [reportsLoading, setReportsLoading] = useState(false);
   const [selectedPatientName, setSelectedPatientName] = useState('');
   const [patientReports, setPatientReports] = useState<PatientReport[]>([]);
+  const [patientCases, setPatientCases] = useState<PatientCase[]>([]);
+  const [selectedPatientProfile, setSelectedPatientProfile] = useState<PatientProfileDetail | null>(null);
   const [showReportsModal, setShowReportsModal] = useState(false);
+  const [showToPatientLoadingId, setShowToPatientLoadingId] = useState<number | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -97,18 +130,65 @@ const MyPatientsPage: React.FC<MyPatientsPageProps> = ({ stats = { patients: 0, 
     setShowReportsModal(true);
     setReportsLoading(true);
     setPatientReports([]);
+    setPatientCases([]);
+    setSelectedPatientProfile(null);
 
     try {
       const res = await axios.get(
-        `/api/doctor/lab-reports/?patient_id=${encodeURIComponent(patientUniqueId)}`,
+        `/api/doctor/patient/${encodeURIComponent(patientUniqueId)}/history/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setPatientReports(Array.isArray(res.data) ? res.data : []);
+      setSelectedPatientProfile(res.data?.patient || null);
+      setPatientReports(Array.isArray(res.data?.reports) ? res.data.reports : []);
+      setPatientCases(Array.isArray(res.data?.cases) ? res.data.cases : []);
     } catch (error) {
       console.error('Failed to fetch patient reports:', error);
       setPatientReports([]);
+      setPatientCases([]);
     } finally {
       setReportsLoading(false);
+    }
+  };
+
+  const handleOpenPatientProfile = async (patientUniqueId: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    setProfileLoading(true);
+    setShowProfileModal(true);
+    setSelectedPatientProfile(null);
+    try {
+      const res = await axios.get(
+        `/api/doctor/patient/${encodeURIComponent(patientUniqueId)}/profile/`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSelectedPatientProfile(res.data || null);
+    } catch (error) {
+      console.error('Failed to fetch patient profile:', error);
+      setSelectedPatientProfile(null);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handleShowToPatient = async (reportId: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    setShowToPatientLoadingId(reportId);
+    try {
+      const res = await axios.post(
+        `/api/doctor/lab-reports/${reportId}/show-to-patient/`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const updated = res.data;
+      setPatientReports((prev) =>
+        prev.map((r) => (r.id === reportId ? { ...r, ...updated } : r))
+      );
+    } catch (error) {
+      console.error('Failed to show report to patient:', error);
+      alert('Failed to show report to patient');
+    } finally {
+      setShowToPatientLoadingId(null);
     }
   };
 
@@ -255,7 +335,10 @@ const MyPatientsPage: React.FC<MyPatientsPageProps> = ({ stats = { patients: 0, 
               <div className="card h-100 border-0 shadow-lg hover-shadow" style={{ borderRadius: '20px' }}>
                 <div className="card-body p-4">
                   <div className="d-flex align-items-center mb-3">
-                    <div style={{
+                    <div
+                      role="button"
+                      onClick={() => handleOpenPatientProfile(patient.patient_id)}
+                      style={{
                       width: '56px', height: '56px', borderRadius: '50%',
                       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                       color: 'white', display: 'flex', alignItems: 'center',
@@ -312,11 +395,28 @@ const MyPatientsPage: React.FC<MyPatientsPageProps> = ({ stats = { patients: 0, 
                           <div>
                             <div className="fw-semibold">Report #{report.id}</div>
                             <small className="text-muted">
-                              {report.report_type || 'General'} • {report.created_at ? new Date(report.created_at).toLocaleString() : 'Unknown date'}
+                              {report.report_type || 'General'} - {report.created_at ? new Date(report.created_at).toLocaleString() : 'Unknown date'}
                             </small>
+                            <div className="small text-muted">
+                              {report.is_visible_to_patient ? 'Visible to patient' : 'Hidden from patient'}
+                              {report.approved_by_name && report.approved_at && (
+                                <> - Approved by {report.approved_by_name} on {new Date(report.approved_at).toLocaleString()}</>
+                              )}
+                            </div>
                           </div>
                           <div className="d-flex align-items-center gap-2">
                             {report.is_flagged && <span className="badge bg-danger">Flagged</span>}
+                            {report.is_visible_to_patient ? (
+                              <span className="badge bg-success">Visible</span>
+                            ) : (
+                              <button
+                                className="btn btn-sm btn-success"
+                                disabled={showToPatientLoadingId === report.id}
+                                onClick={() => handleShowToPatient(report.id)}
+                              >
+                                Show to patient
+                              </button>
+                            )}
                             {report.report_file && (
                               <a
                                 href={`${report.report_file}`}
@@ -331,6 +431,29 @@ const MyPatientsPage: React.FC<MyPatientsPageProps> = ({ stats = { patients: 0, 
                         </div>
                       ))}
                     </div>
+                    {patientCases.length > 0 && (
+                      <div className="mt-3">
+                        <div className="fw-semibold mb-2">Case History</div>
+                        <div className="list-group">
+                          {patientCases.map((caseItem) => (
+                            <div key={caseItem.id} className="list-group-item">
+                              <div className="fw-semibold">
+                                {caseItem.disease_name || 'Case'} {caseItem.doctor_name ? `- Dr. ${caseItem.doctor_name}` : ''}
+                              </div>
+                              <div className="small text-muted">
+                                {caseItem.created_at ? new Date(caseItem.created_at).toLocaleString() : 'Unknown date'}
+                              </div>
+                              {caseItem.reports_required && (
+                                <div className="small text-muted">Reports: {caseItem.reports_required}</div>
+                              )}
+                              {caseItem.notes && (
+                                <div className="small text-muted">Notes: {caseItem.notes}</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   )}
                 </div>
                 <div className="modal-footer">
@@ -342,6 +465,80 @@ const MyPatientsPage: React.FC<MyPatientsPageProps> = ({ stats = { patients: 0, 
             </div>
           </div>
           <div className="modal-backdrop fade show" onClick={() => setShowReportsModal(false)} />
+        </>
+      )}
+
+      {showProfileModal && (
+        <>
+          <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title mb-0">Patient Profile</h5>
+                  <button className="btn-close" onClick={() => setShowProfileModal(false)} />
+                </div>
+                <div className="modal-body">
+                  {profileLoading ? (
+                    <div className="text-center py-4">
+                      <div className="spinner-border text-primary mb-2" />
+                      <p className="text-muted mb-0">Loading profile...</p>
+                    </div>
+                  ) : !selectedPatientProfile ? (
+                    <p className="text-muted mb-0">Profile not available.</p>
+                  ) : (
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <div className="small text-muted">Full name</div>
+                        <div className="fw-semibold">{selectedPatientProfile.full_name || '-'}</div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="small text-muted">Patient ID</div>
+                        <div className="fw-semibold">{selectedPatientProfile.patient_unique_id || '-'}</div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="small text-muted">Email</div>
+                        <div className="fw-semibold">{selectedPatientProfile.user?.email || '-'}</div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="small text-muted">Phone</div>
+                        <div className="fw-semibold">{selectedPatientProfile.phone || '-'}</div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="small text-muted">Date of birth</div>
+                        <div className="fw-semibold">{selectedPatientProfile.date_of_birth || '-'}</div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="small text-muted">Gender</div>
+                        <div className="fw-semibold">{selectedPatientProfile.gender || '-'}</div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="small text-muted">Blood group</div>
+                        <div className="fw-semibold">{selectedPatientProfile.blood_group || '-'}</div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="small text-muted">Emergency contact</div>
+                        <div className="fw-semibold">{selectedPatientProfile.emergency_contact || '-'}</div>
+                      </div>
+                      <div className="col-12">
+                        <div className="small text-muted">Address</div>
+                        <div className="fw-semibold">{selectedPatientProfile.address || '-'}</div>
+                      </div>
+                      <div className="col-12">
+                        <div className="small text-muted">ABHA address</div>
+                        <div className="fw-semibold">{selectedPatientProfile.abha_address || '-'}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-secondary" onClick={() => setShowProfileModal(false)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="modal-backdrop fade show" onClick={() => setShowProfileModal(false)} />
         </>
       )}
     </div>
