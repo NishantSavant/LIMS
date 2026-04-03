@@ -3,4 +3,4 @@ builder = "NIXPACKS"
 buildCommand = "python -m pip install -r backend/requirements.txt && python backend/manage.py collectstatic --noinput"
 
 [deploy]
-startCommand = "python backend/manage.py migrate && gunicorn lims_project.wsgi:application --chdir backend"
+startCommand = "python backend/manage.py migrate core 0018_casetimelineevent_followuptask_notification --fake && python backend/manage.py migrate && gunicorn lims_project.wsgi:application --chdir backend"
