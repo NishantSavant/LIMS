@@ -389,71 +389,73 @@ const MyPatientsPage: React.FC<MyPatientsPageProps> = ({ stats = { patients: 0, 
                   ) : patientReports.length === 0 ? (
                     <p className="text-muted mb-0">No reports found for this patient.</p>
                   ) : (
-                    <div className="list-group">
-                      {patientReports.map((report) => (
-                        <div key={report.id} className="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                            <div className="fw-semibold">Report #{report.id}</div>
-                            <small className="text-muted">
-                              {report.report_type || 'General'} - {report.created_at ? new Date(report.created_at).toLocaleString() : 'Unknown date'}
-                            </small>
-                            <div className="small text-muted">
-                              {report.is_visible_to_patient ? 'Visible to patient' : 'Hidden from patient'}
-                              {report.approved_by_name && report.approved_at && (
-                                <> - Approved by {report.approved_by_name} on {new Date(report.approved_at).toLocaleString()}</>
-                              )}
-                            </div>
-                          </div>
-                          <div className="d-flex align-items-center gap-2">
-                            {report.is_flagged && <span className="badge bg-danger">Flagged</span>}
-                            {report.is_visible_to_patient ? (
-                              <span className="badge bg-success">Visible</span>
-                            ) : (
-                              <button
-                                className="btn btn-sm btn-success"
-                                disabled={showToPatientLoadingId === report.id}
-                                onClick={() => handleShowToPatient(report.id)}
-                              >
-                                Show to patient
-                              </button>
-                            )}
-                            {report.report_file && (
-                              <a
-                                href={`${report.report_file}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-sm btn-outline-primary"
-                              >
-                                View File
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    {patientCases.length > 0 && (
-                      <div className="mt-3">
-                        <div className="fw-semibold mb-2">Case History</div>
-                        <div className="list-group">
-                          {patientCases.map((caseItem) => (
-                            <div key={caseItem.id} className="list-group-item">
-                              <div className="fw-semibold">
-                                {caseItem.disease_name || 'Case'} {caseItem.doctor_name ? `- Dr. ${caseItem.doctor_name}` : ''}
-                              </div>
+                    <>
+                      <div className="list-group">
+                        {patientReports.map((report) => (
+                          <div key={report.id} className="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                              <div className="fw-semibold">Report #{report.id}</div>
+                              <small className="text-muted">
+                                {report.report_type || 'General'} - {report.created_at ? new Date(report.created_at).toLocaleString() : 'Unknown date'}
+                              </small>
                               <div className="small text-muted">
-                                {caseItem.created_at ? new Date(caseItem.created_at).toLocaleString() : 'Unknown date'}
+                                {report.is_visible_to_patient ? 'Visible to patient' : 'Hidden from patient'}
+                                {report.approved_by_name && report.approved_at && (
+                                  <> - Approved by {report.approved_by_name} on {new Date(report.approved_at).toLocaleString()}</>
+                                )}
                               </div>
-                              {caseItem.reports_required && (
-                                <div className="small text-muted">Reports: {caseItem.reports_required}</div>
+                            </div>
+                            <div className="d-flex align-items-center gap-2">
+                              {report.is_flagged && <span className="badge bg-danger">Flagged</span>}
+                              {report.is_visible_to_patient ? (
+                                <span className="badge bg-success">Visible</span>
+                              ) : (
+                                <button
+                                  className="btn btn-sm btn-success"
+                                  disabled={showToPatientLoadingId === report.id}
+                                  onClick={() => handleShowToPatient(report.id)}
+                                >
+                                  Show to patient
+                                </button>
                               )}
-                              {caseItem.notes && (
-                                <div className="small text-muted">Notes: {caseItem.notes}</div>
+                              {report.report_file && (
+                                <a
+                                  href={`${report.report_file}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn btn-sm btn-outline-primary"
+                                >
+                                  View File
+                                </a>
                               )}
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
-                    )}
+                      {patientCases.length > 0 && (
+                        <div className="mt-3">
+                          <div className="fw-semibold mb-2">Case History</div>
+                          <div className="list-group">
+                            {patientCases.map((caseItem) => (
+                              <div key={caseItem.id} className="list-group-item">
+                                <div className="fw-semibold">
+                                  {caseItem.disease_name || 'Case'} {caseItem.doctor_name ? `- Dr. ${caseItem.doctor_name}` : ''}
+                                </div>
+                                <div className="small text-muted">
+                                  {caseItem.created_at ? new Date(caseItem.created_at).toLocaleString() : 'Unknown date'}
+                                </div>
+                                {caseItem.reports_required && (
+                                  <div className="small text-muted">Reports: {caseItem.reports_required}</div>
+                                )}
+                                {caseItem.notes && (
+                                  <div className="small text-muted">Notes: {caseItem.notes}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="modal-footer">
