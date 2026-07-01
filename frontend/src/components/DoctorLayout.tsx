@@ -1,5 +1,5 @@
 // src/layouts/DoctorLayout.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { FaSignOutAlt } from 'react-icons/fa';
 import axios from 'axios';
@@ -9,11 +9,18 @@ const DoctorLayout: React.FC = () => {
   const location = useLocation();
   const needsTopOffset = !location.pathname.endsWith('/dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login', { replace: true });
+    }
+  }, [token, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   return (

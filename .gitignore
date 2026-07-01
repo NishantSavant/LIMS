@@ -1,0 +1,34 @@
+# ======================
+# Python
+# ======================
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment files
+**/.env
+
+# Django
+backend/staticfiles/
+backend/media/
+
+# React
+frontend/node_modules/
+frontend/build/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

@@ -5,7 +5,7 @@ from typing import List, Optional
 from rest_framework.views import APIView
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import action, api_view, permission_classes, parser_classes
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import IsAuthenticated, BasePermission, AllowAny
 from rest_framework.response import Response 
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -17,6 +17,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
 from datetime import date, timedelta, datetime
 import logging
+import random
+from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
 
@@ -1502,3 +1504,93 @@ def lab_patient_case_report_requests(request):
         'requested_at': r.created_at,
     } for r in qs]
     return Response(data, status=200)
+
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def send_otp(request):
+
+    email = request.data.get('email')
+
+    latest = EmailOTP.objects.filter(
+        email=email
+    ).order_by('-created_at').first()
+
+    # Resend cooldown = 1 minute
+    if latest:
+        seconds_since_last = (
+            timezone.now() - latest.created_at
+        ).total_seconds()
+
+        if seconds_since_last < 60:
+            return Response({
+                "success": False,
+                "message": "Please wait before requesting another OTP",
+                "seconds_remaining": int(60 - seconds_since_last)
+            })
+
+    # Invalidate old OTP
+    EmailOTP.objects.filter(email=email).delete()
+
+    otp = str(random.randint(100000, 999999))
+
+    EmailOTP.objects.create(
+        email=email,
+        otp=otp
+    )
+
+    # Send email here
+
+    send_mail(
+    subject='LIMS Email Verification',
+    message=f'Your OTP is: {otp}\n\nThis OTP is valid for 5 minutes.',
+    from_email=settings.EMAIL_HOST_USER,
+    recipient_list=[email],
+    fail_silently=False
+)
+    return Response({
+        "success": True,
+        "resend_after": 60,
+        "expires_after": 300
+    })
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_otp(request):
+
+    email = request.data.get("email")
+    otp = request.data.get("otp")
+
+    otp_record = EmailOTP.objects.filter(
+        email=email
+    ).order_by('-created_at').first()
+
+    if not otp_record:
+        return Response({
+            "success": False,
+            "message": "OTP not found"
+        })
+
+    # OTP expires after 5 minutes
+    if timezone.now() - otp_record.created_at > timedelta(minutes=5):
+
+        otp_record.delete()
+
+        return Response({
+            "success": False,
+            "message": "OTP expired"
+        })
+
+    if otp_record.otp == otp:
+
+        otp_record.delete()
+
+        return Response({
+            "success": True
+        })
+
+    return Response({
+        "success": False,
+        "message": "Invalid OTP"
+    })

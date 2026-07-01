@@ -31,6 +31,7 @@ urlpatterns = [
     path('book-appointment/', views.book_appointment, name='book-appointment'),
     path('patient/appointments/', views.patient_appointments, name='patient-appointments'),
     path('doctor/appointments/', views.doctor_appointments, name='doctor-appointments'),
+    
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 
@@ -22,10 +22,9 @@ const Signup: React.FC = () => {
   // Step 2: role + phone + otp
   const [role, setRole] = useState('');
   const [phone, setPhone] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [otpInput, setOtpInput] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
+  const [otpInput, setOtpInput] = useState('');
+  const [secondsLeft, setSecondsLeft] = useState(0);
 
   // Step 3: role specific
   const [address, setAddress] = useState('');
@@ -44,31 +43,53 @@ const Signup: React.FC = () => {
 
   const fullName = useMemo(() => [firstName, middleName, lastName].filter(Boolean).join(' '), [firstName, middleName, lastName]);
 
-  const sendOtp = () => {
-    if (!phone || phone.length < 8) {
-      alert('Enter a valid phone number');
-      return;
-    }
-    const generated = String(Math.floor(100000 + Math.random() * 900000));
-    setOtpCode(generated);
-    setOtpSent(true);
-    setOtpVerified(false);
-    alert('OTP sent (demo mode).');
+const sendOTP = async () => {
+
+    await axios.post(
+      "http://127.0.0.1:8000/api/send-otp/",
+
+      {
+        email: email
+      }
+    );
+
+    alert("OTP Sent");
+    setSecondsLeft(60);
   };
 
-  const verifyOtp = () => {
-    if (!otpSent) return;
-    if (otpInput === otpCode) {
+  const verifyOTP = async () => {
+    try{
+    const response = await axios.post(
+      "http://127.0.0.1:8000/api/verify-otp/",
+      {
+        email: email,
+        otp: otpInput
+      }
+    );
+
+    if(response.data.success){
+
+      alert("OTP Verified");
       setOtpVerified(true);
-      alert('OTP verified');
+  
     } else {
-      alert('Invalid OTP');
+
+      alert("Invalid OTP");
+      return;
+
     }
+  } catch(error){
+
+    alert("OTP Verification Failed");
+    return;
+
+  }
   };
+  
 
   const goNext = () => {
     if (step === 1) {
-      if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      if (!firstName || !lastName || !phone || !password || !confirmPassword) {
         alert('Please complete all required fields');
         return;
       }
@@ -80,12 +101,8 @@ const Signup: React.FC = () => {
       return;
     }
     if (step === 2) {
-      if (!role || !phone) {
+      if (!role) {
         alert('Select role and phone number');
-        return;
-      }
-      if (!otpVerified) {
-        alert('Verify OTP before continuing');
         return;
       }
       setStep(3);
@@ -101,10 +118,9 @@ const Signup: React.FC = () => {
     e.preventDefault();
 
     if (!otpVerified) {
-      alert('Verify OTP before creating account');
-      return;
-    }
-
+    alert("Please verify your OTP before registering.");
+    return;
+  }
     setLoading(true);
     try {
       const payload: Record<string, any> = {
@@ -143,6 +159,7 @@ const Signup: React.FC = () => {
         payload.lab_license_no = labLicenseNo;
       }
 
+
       await axios.post('/api/register/', payload);
       alert('Account created! You can now log in.');
       window.location.href = '/login';
@@ -152,6 +169,16 @@ const Signup: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+  if (secondsLeft <= 0) return;
+
+  const timer = setInterval(() => {
+    setSecondsLeft(prev => prev - 1);
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [secondsLeft]);
 
   return (
     <div className="signup-root">
@@ -165,8 +192,8 @@ const Signup: React.FC = () => {
           </p>
           <div className="signup-steps">
             <div className={`signup-step ${step >= 1 ? 'active' : ''}`}>1. Identity</div>
-            <div className={`signup-step ${step >= 2 ? 'active' : ''}`}>2. Role + OTP</div>
-            <div className={`signup-step ${step >= 3 ? 'active' : ''}`}>3. Profile</div>
+            <div className={`signup-step ${step >= 2 ? 'active' : ''}`}>2. Profile</div>
+            <div className={`signup-step ${step >= 3 ? 'active' : ''}`}>3. Verification</div>
           </div>
         </div>
 
@@ -189,8 +216,8 @@ const Signup: React.FC = () => {
                     <input value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                   </div>
                   <div>
-                    <label>Email</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    <label>Phone number</label>
+                    <input value={phone} onChange={(e) => setPhone(e.target.value)} required />
                   </div>
                   <div>
                     <label>Password</label>
@@ -226,8 +253,8 @@ const Signup: React.FC = () => {
 
             {step === 2 && (
               <>
-                <h3>Choose your role</h3>
-                <div className="signup-grid">
+                <h3>Complete your profile</h3>
+
                   <div>
                     <label>Role</label>
                     <select value={role} onChange={(e) => setRole(e.target.value)} required>
@@ -237,28 +264,6 @@ const Signup: React.FC = () => {
                       <option value="lab">Lab Staff</option>
                     </select>
                   </div>
-                  <div>
-                    <label>Phone number</label>
-                    <input value={phone} onChange={(e) => setPhone(e.target.value)} required />
-                  </div>
-                </div>
-
-                <div className="signup-otp">
-                  <button type="button" className="signup-button ghost" onClick={sendOtp}>Send OTP</button>
-                  <div className="signup-otp-row">
-                    <input placeholder="Enter OTP" value={otpInput} onChange={(e) => setOtpInput(e.target.value)} />
-                    <button type="button" className="signup-button subtle" onClick={verifyOtp}>Verify</button>
-                  </div>
-                  {otpSent && (
-                    <div className="signup-otp-hint">Demo OTP: {otpCode}</div>
-                  )}
-                </div>
-              </>
-            )}
-
-            {step === 3 && (
-              <>
-                <h3>Complete your profile</h3>
 
                 {role === 'patient' && (
                   <div className="signup-grid">
@@ -350,6 +355,43 @@ const Signup: React.FC = () => {
                     </div>
                   </div>
                 )}
+                
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+              <h3>Verify Your Email</h3>
+                <div className="signup-grid">
+                  <div>
+                    <label>Email</label>
+                    <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => {
+                              setEmail(e.target.value);
+                              setOtpVerified(false);
+                          }}
+                          required
+                        />
+                  </div>
+                </div>  
+              
+                <div className="signup-otp">
+                    <button
+                       type="button"
+                      disabled={secondsLeft > 0}
+                      onClick={sendOTP}
+                    >
+                      {secondsLeft > 0
+                        ? `Resend OTP in ${secondsLeft}s`
+                        : "Send OTP"}
+                    </button>                  
+                  <div className="signup-otp-row">
+                    <input placeholder="Enter OTP" value={otpInput} onChange={(e) => setOtpInput(e.target.value)} />
+                    <button type="button" className="signup-button subtle" onClick={verifyOTP}>Verify</button>
+                  </div>
+                </div>
               </>
             )}
 
@@ -357,12 +399,18 @@ const Signup: React.FC = () => {
               {step > 1 && (
                 <button type="button" className="signup-button ghost" onClick={goBack}>Back</button>
               )}
-              {step < 3 && (
+              {step === 2 && (
+                <button type="button" className="signup-button primary" onClick={goNext}>Next</button>
+              )}
+              {step === 1 && (
                 <button type="button" className="signup-button primary" onClick={goNext}>Next</button>
               )}
               {step === 3 && (
-                <button type="submit" className="signup-button primary" disabled={loading}>
-                  {loading ? 'Creating...' : 'Create account'}
+                <button
+                    type="submit"
+                    disabled={!otpVerified || loading}
+                  >
+                    {loading ? 'Creating...' : 'Create account'}
                 </button>
               )}
             </div>

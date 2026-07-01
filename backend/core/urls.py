@@ -76,4 +76,6 @@ urlpatterns = [
     path('patient/followups/', patient_followup_tasks, name='patient_followup_tasks'),
     path('notifications/', my_notifications, name='my_notifications'),
     path('notifications/<int:pk>/read/', mark_notification_read, name='mark_notification_read'),
+    path('send-otp/', send_otp),
+    path('verify-otp/', verify_otp),
 ]
