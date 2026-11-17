@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { FaTachometerAlt, FaUpload, FaFileAlt, FaCalendarCheck, FaSignOutAlt, FaVial, FaCog } from 'react-icons/fa';
+import { CalendarCheck, FileText, LayoutDashboard, LogOut, Settings, TestTube, Upload } from 'lucide-react';
 import axios from 'axios';
 
 const LabLayout: React.FC = () => {
@@ -45,12 +45,12 @@ const LabLayout: React.FC = () => {
         </div>
 
         <nav className="flex-grow-1 px-2 py-3">
-          <SidebarLink icon={<FaTachometerAlt />} label="Overview" to="/lab/dashboard" onClick={() => setSidebarOpen(false)} />
-          <SidebarLink icon={<FaUpload />} label="Upload Report" to="/lab/upload-reports" onClick={() => setSidebarOpen(false)} />
-          <SidebarLink icon={<FaFileAlt />} label="All Reports" to="/lab/reports" onClick={() => setSidebarOpen(false)} />
-          <SidebarLink icon={<FaCalendarCheck />} label="Appointments" to="/lab/appointments" onClick={() => setSidebarOpen(false)} />
-          <SidebarLink icon={<FaVial />} label="Create Sample" to="/lab/create-sample" onClick={() => setSidebarOpen(false)} />
-          <SidebarLink icon={<FaCog />} label="Settings" to="/lab/settings" onClick={() => setSidebarOpen(false)} />
+          <SidebarLink icon={<LayoutDashboard />} label="Overview" to="/lab/dashboard" onClick={() => setSidebarOpen(false)} />
+          <SidebarLink icon={<Upload />} label="Upload Report" to="/lab/upload-reports" onClick={() => setSidebarOpen(false)} />
+          <SidebarLink icon={<FileText />} label="All Reports" to="/lab/reports" onClick={() => setSidebarOpen(false)} />
+          <SidebarLink icon={<CalendarCheck />} label="Appointments" to="/lab/appointments" onClick={() => setSidebarOpen(false)} />
+          <SidebarLink icon={<TestTube />} label="Create Sample" to="/lab/create-sample" onClick={() => setSidebarOpen(false)} />
+          <SidebarLink icon={<Settings />} label="Settings" to="/lab/settings" onClick={() => setSidebarOpen(false)} />
         </nav>
 
         <div className="p-3 border-top">
@@ -61,7 +61,7 @@ const LabLayout: React.FC = () => {
               setSidebarOpen(false);
             }}
           >
-            <FaSignOutAlt className="me-2" size={12} />
+            <LogOut className="me-2" size={12} />
             Logout
           </button>
         </div>

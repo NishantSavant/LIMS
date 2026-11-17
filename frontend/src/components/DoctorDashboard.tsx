@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaUserInjured, FaClipboardList, FaCalendarCheck, FaFilePrescription } from 'react-icons/fa';
+import { UserRound, ClipboardList, CalendarCheck, FileText } from 'lucide-react';
 
 interface DoctorUser {
   id: number;
@@ -153,10 +153,10 @@ const DoctorDashboard: React.FC = () => {
       </div>
 
       <div className="row g-3 mb-4">
-        <div className="col-md-3"><StatCard title="Patients" value={liveStats.patients} icon={<FaUserInjured />} /></div>
-        <div className="col-md-3"><StatCard title="Requests" value={liveStats.requests} icon={<FaClipboardList />} /></div>
-        <div className="col-md-3"><StatCard title="Appointments" value={liveStats.appointments} icon={<FaCalendarCheck />} /></div>
-        <div className="col-md-3"><StatCard title="Lab Reports" value={liveStats.labReports} icon={<FaFilePrescription />} /></div>
+        <div className="col-md-3"><StatCard title="Patients" value={liveStats.patients} icon={<UserRound />} /></div>
+        <div className="col-md-3"><StatCard title="Requests" value={liveStats.requests} icon={<ClipboardList />} /></div>
+        <div className="col-md-3"><StatCard title="Appointments" value={liveStats.appointments} icon={<CalendarCheck />} /></div>
+        <div className="col-md-3"><StatCard title="Lab Reports" value={liveStats.labReports} icon={<FileText />} /></div>
       </div>
 
       <div className="row g-4 mb-4">

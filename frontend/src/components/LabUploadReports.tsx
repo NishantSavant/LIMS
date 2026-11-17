@@ -1,7 +1,7 @@
 // src/components/LabUploadReports.tsx
 import React, { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
-import { FaSearch, FaUser, FaFileUpload } from 'react-icons/fa';
+import { FileUp, Search, User } from 'lucide-react';
 
 interface SearchResult {
   id: number;
@@ -233,7 +233,7 @@ const LabUploadReports: React.FC = () => {
               <div className="position-relative">
                 <div className="input-group">
                   <span className="input-group-text bg-white border-end-0">
-                    <FaSearch />
+                    <Search />
                   </span>
                   <input
                     type="text"
@@ -280,7 +280,7 @@ const LabUploadReports: React.FC = () => {
                               color: '#7c3aed',
                             }}
                           >
-                            <FaUser />
+                            <User />
                           </div>
                           <div>
                             <div style={{ fontWeight: 600 }}>{p.full_name}</div>
@@ -409,7 +409,7 @@ const LabUploadReports: React.FC = () => {
               onChange={handleFileChange}
             />
             <label htmlFor="report-file" style={{ cursor: 'pointer' }}>
-              <FaFileUpload size={32} className="mb-2 text-primary" />
+              <FileUp size={32} className="mb-2 text-primary" />
               <div className="fw-semibold mb-1">Click to upload report file</div>
               <small className="text-muted">PDF, JPG, PNG up to 10MB</small>
             </label>

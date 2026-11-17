@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaVial, FaBarcode, FaPrint, FaSearch, FaUser } from 'react-icons/fa';
+import { Barcode, Printer, Search, TestTube, User } from 'lucide-react';
 
 interface SearchResult {
   id: number;
@@ -89,7 +89,7 @@ const LabCreateSample: React.FC = () => {
       <div className="row mb-4">
         <div className="col-12">
           <div className="d-flex align-items-center mb-3">
-            <FaVial size={32} className="me-3 text-success" />
+            <TestTube size={32} className="me-3 text-success" />
             <div>
               <h2 className="mb-1 fw-bold">Create Sample</h2>
               <small>Search patient → Generate barcode → Print & stick</small>
@@ -108,7 +108,7 @@ const LabCreateSample: React.FC = () => {
                 <div className="position-relative">
                   <div className="input-group">
                     <span className="input-group-text bg-white border-end-0">
-                      <FaSearch />
+                      <Search />
                     </span>
                     <input
                       type="text"
@@ -161,7 +161,7 @@ const LabCreateSample: React.FC = () => {
                                 color: '#7c3aed',
                               }}
                             >
-                              <FaUser />
+                              <User />
                             </div>
                             <div>
                               <div style={{ fontWeight: 600 }}>{person.full_name}</div>
@@ -215,7 +215,7 @@ const LabCreateSample: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <FaBarcode className="me-2" />
+                    <Barcode className="me-2" />
                     Generate Sample ID + Print Barcode
                   </>
                 )}
@@ -234,7 +234,7 @@ const LabCreateSample: React.FC = () => {
                   <div className="small mb-3">Sample ID: {result.sample_id} | Ready for upload</div>
                   <div className="d-flex gap-2 justify-content-center">
                     <button className="btn btn-light btn-sm px-4" onClick={() => window.print()}>
-                      <FaPrint /> Print Again
+                      <Printer /> Print Again
                     </button>
                     <button className="btn btn-outline-light btn-sm px-4" onClick={() => navigate('/lab-dashboard')}>
                       Dashboard

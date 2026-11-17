@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 
 const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -229,7 +229,7 @@ const sendOTP = async () => {
                         onClick={() => setShowPassword((v) => !v)}
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
-                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        {showPassword ? <EyeOff /> : <Eye />}
                       </button>
                     </div>
                   </div>
@@ -243,7 +243,7 @@ const sendOTP = async () => {
                         onClick={() => setShowConfirmPassword((v) => !v)}
                         aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                       >
-                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                        {showConfirmPassword ? <EyeOff /> : <Eye />}
                       </button>
                     </div>
                   </div>

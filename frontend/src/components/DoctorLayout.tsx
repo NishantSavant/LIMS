@@ -1,7 +1,7 @@
 // src/layouts/DoctorLayout.tsx
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { FaSignOutAlt } from 'react-icons/fa';
+import { LogOut } from 'lucide-react';
 import axios from 'axios';
 
 const DoctorLayout: React.FC = () => {
@@ -104,7 +104,7 @@ const DoctorLayout: React.FC = () => {
               setSidebarOpen(false);
             }}
           >
-            <FaSignOutAlt className="me-2" />
+            <LogOut className="me-2" />
             Logout
           </button>
         </div>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Modal } from 'react-bootstrap';
 import axios from 'axios';
-import { FaSpinner } from 'react-icons/fa';
+import { LoaderCircle } from "lucide-react";
 
 // In BookAppointmentModal.tsx - CHANGE Doctor interface:
 interface Doctor {
@@ -376,8 +376,7 @@ Check Real Availability
  >
  {loading ? (
  <>
- <FaSpinner className="spin me-2" size={18} />
- Booking...
+    <LoaderCircle className="spin me-2" size={18} /> Booking...
  </>
  ) : (
  'Book Appointment'

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaSearch, FaFileAlt, FaDownload, FaFilter } from 'react-icons/fa';
+import { Download, FileText, Filter, Search } from 'lucide-react';
 
 
 interface LabReport {
@@ -105,7 +105,7 @@ const PatientViewReports: React.FC = () => {
       <div className="row mb-4">
         <div className="col-12">
           <div className="d-flex align-items-center mb-3">
-            <FaFileAlt size={32} className="me-3 text-primary" />
+            <FileText size={32} className="me-3 text-primary" />
             <div>
               <h2 className="mb-1 fw-bold text-dark">Medical Reports</h2>
               <small className="text-muted">View all your lab test results</small>
@@ -118,7 +118,7 @@ const PatientViewReports: React.FC = () => {
       <div className="row mb-4">
         <div className="col-lg-5 col-md-6 mb-3">
           <div className="position-relative">
-            <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style={{ zIndex: 10 }} />
+            <Search className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style={{ zIndex: 10 }} />
             <input
               type="text"
               className="form-control ps-5"
@@ -132,7 +132,7 @@ const PatientViewReports: React.FC = () => {
 
         <div className="col-lg-3 col-md-6 mb-3">
           <div className="position-relative">
-            <FaFilter className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style={{ zIndex: 10 }} />
+            <Filter className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style={{ zIndex: 10 }} />
             <select
               className="form-select"
               style={{ borderRadius: '12px', border: '2px solid #e2e8f0', padding: '12px 16px' }}
@@ -150,7 +150,7 @@ const PatientViewReports: React.FC = () => {
 
         <div className="col-lg-4 col-md-12 text-end">
           <button className="btn btn-outline-primary px-4 py-2 fw-semibold" style={{ borderRadius: '12px' }}>
-            Export All <FaDownload className="ms-1" />
+            Export All <Download className="ms-1" />
           </button>
         </div>
       </div>

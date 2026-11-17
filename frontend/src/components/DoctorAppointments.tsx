@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaCalendarCheck, FaUser, FaClock, FaCheck, FaTimes, FaCalendarDay } from 'react-icons/fa';
+import { CalendarCheck, User, Clock, Check, X, CalendarDays } from 'lucide-react';
 
 interface Appointment {
   id: number;
@@ -166,7 +166,7 @@ const DoctorAppointments: React.FC = () => {
                       className={`nav-link fw-bold fs-6 ${activeTab === 'pending' ? 'active bg-warning text-dark' : 'text-muted'}`}
                       onClick={() => setActiveTab('pending')}
                     >
-                      <FaClock className="me-2" />
+                      <Clock className="me-2" />
                       Pending ({pendingRequests.length})
                     </button>
                   </li>
@@ -175,7 +175,7 @@ const DoctorAppointments: React.FC = () => {
                       className={`nav-link fw-bold fs-6 ${activeTab === 'upcoming' ? 'active bg-success text-white' : 'text-muted'}`}
                       onClick={() => setActiveTab('upcoming')}
                     >
-                      <FaCalendarCheck className="me-2" />
+                      <CalendarCheck className="me-2" />
                       Upcoming ({upcomingAppointments.length})
                     </button>
                   </li>
@@ -184,7 +184,7 @@ const DoctorAppointments: React.FC = () => {
                       className={`nav-link fw-bold fs-6 ${activeTab === 'past' ? 'active bg-secondary text-white' : 'text-muted'}`}
                       onClick={() => setActiveTab('past')}
                     >
-                      <FaCalendarDay className="me-2" />
+                      <CalendarDays className="me-2" />
                       Past ({pastAppointments.length})
                     </button>
                   </li>
@@ -196,9 +196,9 @@ const DoctorAppointments: React.FC = () => {
             <div className="card border-0 shadow-lg" style={{ borderRadius: '24px' }}>
               <div className={`card-header border-0 p-4 ${activeTab === 'pending' ? 'bg-warning bg-opacity-10' : activeTab === 'upcoming' ? 'bg-success bg-opacity-10' : 'bg-secondary bg-opacity-10'}`}>
                 <h5 className={`mb-0 fw-bold ${activeTab === 'pending' ? 'text-warning' : activeTab === 'upcoming' ? 'text-success' : 'text-secondary'}`}>
-                  {activeTab === 'pending' && <FaClock className="me-2" />}
-                  {activeTab === 'upcoming' && <FaCalendarCheck className="me-2" />}
-                  {activeTab === 'past' && <FaCalendarDay className="me-2" />}
+                  {activeTab === 'pending' && <Clock className="me-2" />}
+                  {activeTab === 'upcoming' && <CalendarCheck className="me-2" />}
+                  {activeTab === 'past' && <CalendarDays className="me-2" />}
                   {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Appointments ({appointments.length})
                 </h5>
               </div>
@@ -224,7 +224,7 @@ const DoctorAppointments: React.FC = () => {
                             }}>
                               <div className="d-flex align-items-center justify-content-between">
                                 <div className="text-white">
-                                  <FaCalendarDay className="me-1" style={{ color: 'white' }} />
+                                  <CalendarDays className="me-1" style={{ color: 'white' }} />
                                   <strong style={{ color: 'white', fontSize: '1.1rem' }}>
                                     {formatAppointmentDate(appt.date)}
                                   </strong>
@@ -292,7 +292,7 @@ const DoctorAppointments: React.FC = () => {
                                   onClick={() => approveAppointment(appt.id)}
                                   disabled={loading}
                                 >
-                                  <FaCheck className="me-2" />
+                                  <Check className="me-2" />
                                   Approve
                                 </button>
                                 <button 
@@ -300,7 +300,7 @@ const DoctorAppointments: React.FC = () => {
                                   onClick={() => rejectAppointment(appt.id)}
                                   disabled={loading}
                                 >
-                                  <FaTimes className="me-2" />
+                                  <X className="me-2" />
                                   Reject
                                 </button>
                               </div>
@@ -348,7 +348,7 @@ const DoctorAppointments: React.FC = () => {
                   </div>
                 ) : (
                   <div className="text-center py-5 text-muted">
-                    <FaCalendarCheck size={64} className="mb-4 opacity-50" />
+                    <CalendarCheck size={64} className="mb-4 opacity-50" />
                     <h5 className="fw-semibold mb-2">No {activeTab} appointments</h5>
                     <p className="mb-0">
                       {activeTab === 'pending' && 'Requests will appear here when patients book with you'}
@@ -375,7 +375,7 @@ const DoctorAppointments: React.FC = () => {
         <div className="modal-content">
           <div className="modal-header bg-primary text-white">
             <h5 className="modal-title mb-0">
-              <FaUser className="me-2" /> Patient Details
+              <User className="me-2" /> Patient Details
             </h5>
             <button 
               className="btn-close btn-close-white" 

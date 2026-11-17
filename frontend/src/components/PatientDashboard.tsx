@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaFileAlt, FaPrescriptionBottleAlt, FaPills } from 'react-icons/fa';
+import { FileText, Pill, PillBottle } from 'lucide-react';
 
 interface MeUser {
   id: number;
@@ -201,10 +201,10 @@ const PatientDashboard: React.FC = () => {
       </div>
 
       <div className="row g-3 mb-4">
-        <StatCard title="Total Reports" value={stats.total_reports} icon={<FaFileAlt />} />
-        <StatCard title="Upcoming Appointments" value={upcomingAppointments.length} icon={<FaPills />} />
-        <StatCard title="Prescriptions" value={stats.total_prescriptions} icon={<FaPrescriptionBottleAlt />} />
-        <StatCard title="Active Orders" value={stats.total_orders} icon={<FaPills />} />
+        <StatCard title="Total Reports" value={stats.total_reports} icon={<FileText />} />
+        <StatCard title="Upcoming Appointments" value={upcomingAppointments.length} icon={<Pill />} />
+        <StatCard title="Prescriptions" value={stats.total_prescriptions} icon={<PillBottle />} />
+        <StatCard title="Active Orders" value={stats.total_orders} icon={<Pill />} />
       </div>
 
       <div className="row g-4 mb-4">

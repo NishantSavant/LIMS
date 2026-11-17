@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaUpload, FaVial, FaFileAlt, FaUserInjured } from 'react-icons/fa';
+import { FileText, TestTube, Upload, Users } from 'lucide-react';
 
 interface Sample {
   id: number;
@@ -95,10 +95,10 @@ const LabDashboard: React.FC<LabDashboardProps> = () => {
       </div>
 
       <div className="row g-3 mb-4">
-        <div className="col-md-3"><StatCard title="Pending Samples" value={stats.pending_samples} icon={<FaVial />} /></div>
-        <div className="col-md-3"><StatCard title="Today's Uploads" value={stats.todays_uploads} icon={<FaUpload />} /></div>
-        <div className="col-md-3"><StatCard title="Total Patients" value={stats.total_patients} icon={<FaUserInjured />} /></div>
-        <div className="col-md-3"><StatCard title="Critical Reports" value={stats.critical_reports} icon={<FaFileAlt />} /></div>
+        <div className="col-md-3"><StatCard title="Pending Samples" value={stats.pending_samples} icon={<TestTube />} /></div>
+        <div className="col-md-3"><StatCard title="Today's Uploads" value={stats.todays_uploads} icon={<Upload />} /></div>
+        <div className="col-md-3"><StatCard title="Total Patients" value={stats.total_patients} icon={<Users />} /></div>
+        <div className="col-md-3"><StatCard title="Critical Reports" value={stats.critical_reports} icon={<FileText />} /></div>
       </div>
 
       <div className="row g-4">
