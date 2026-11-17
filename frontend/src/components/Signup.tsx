@@ -1,11 +1,13 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 
 const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const genders = ['male', 'female', 'other'];
 
 const Signup: React.FC = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -46,7 +48,7 @@ const Signup: React.FC = () => {
 const sendOTP = async () => {
 
     await axios.post(
-      "http://127.0.0.1:8000/api/send-otp/",
+      '/api/send-otp/',
 
       {
         email: email
@@ -60,7 +62,7 @@ const sendOTP = async () => {
   const verifyOTP = async () => {
     try{
     const response = await axios.post(
-      "http://127.0.0.1:8000/api/verify-otp/",
+      '/api/verify-otp/',
       {
         email: email,
         otp: otpInput
@@ -162,7 +164,7 @@ const sendOTP = async () => {
 
       await axios.post('/api/register/', payload);
       alert('Account created! You can now log in.');
-      window.location.href = '/login';
+      navigate('/login', { replace: true });
     } catch (error: any) {
       alert(error.response?.data?.detail || 'Signup failed. Check your details and try again.');
     } finally {
@@ -416,7 +418,7 @@ const sendOTP = async () => {
             </div>
 
             <div className="signup-footer">
-              Already have an account? <a href="/login">Log in</a>
+              Already have an account? <Link to="/login">Log in</Link>
             </div>
           </form>
         </div>

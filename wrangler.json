@@ -1,0 +1,8 @@
+{
+  "name": "lims",
+  "compatibility_date": "2026-11-17",
+  "assets": {
+    "directory": "./frontend/build",
+    "not_found_handling": "single-page-application"
+  }
+}

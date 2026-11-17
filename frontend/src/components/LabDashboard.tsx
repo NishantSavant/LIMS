@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FileText, TestTube, Upload, Users } from 'lucide-react';
+import { useAuth } from '../auth';
 
 interface Sample {
   id: number;
@@ -33,6 +34,7 @@ interface LabDashboardProps {
 
 const LabDashboard: React.FC<LabDashboardProps> = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [pendingSamples, setPendingSamples] = useState<Sample[]>([]);
   const [sampleHistory, setSampleHistory] = useState<Sample[]>([]);
   const [stats, setStats] = useState<LabStats>({
@@ -49,7 +51,8 @@ const LabDashboard: React.FC<LabDashboardProps> = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadAll = useCallback(async () => {
     if (!token) {
-      navigate('/login');
+      signOut();
+      navigate('/login', { replace: true });
       return;
     }
 
@@ -71,9 +74,10 @@ const LabDashboard: React.FC<LabDashboardProps> = () => {
       setSampleHistory(Array.isArray(historyRes.data) ? historyRes.data : []);
       setNotifications(Array.isArray(notifRes.data) ? notifRes.data : []);
     } catch {
-      navigate('/login');
+      signOut();
+      navigate('/login', { replace: true });
     }
-  }, [token, navigate]);
+  }, [token, navigate, signOut]);
 
   useEffect(() => {
     loadAll();

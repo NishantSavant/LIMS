@@ -142,7 +142,7 @@ CORS_ALLOWED_ORIGINS = [
     origin.strip()
     for origin in config(
         'CORS_ALLOWED_ORIGINS',
-        default='http://localhost:3000,http://127.0.0.1:3000,http://localhost,http://192.168.1.7,http://192.168.1.7:3000,http://lims-1-4erh.onrender.com',
+        default='http://localhost:3000,http://127.0.0.1:3000,http://localhost,http://192.168.1.7,http://192.168.1.7:3000,https://lims.lims-production01.workers.dev',
     ).split(',')
     if origin.strip()
 ]
@@ -153,7 +153,7 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in config(
         'CSRF_TRUSTED_ORIGINS',
-        default='http://localhost:3000,http://127.0.0.1:3000,http://localhost,http://192.168.1.7,http://192.168.1.7:3000,http://lims-1-4erh.onrender.com',
+        default='http://localhost:3000,http://127.0.0.1:3000,http://localhost,http://192.168.1.7,http://192.168.1.7:3000,https://lims.lims-production01.workers.dev',
     ).split(',')
     if origin.strip()
 ]
@@ -177,5 +177,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = 'lims.production01@gmail.com'
-EMAIL_HOST_PASSWORD = 'olpy tunr rdfb cbbi'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')

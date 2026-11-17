@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Home: React.FC = () => {
   return (
@@ -12,8 +13,8 @@ const Home: React.FC = () => {
           </div>
         </div>
         <div className="home-nav-actions">
-          <a className="home-link" href="/login">Log in</a>
-          <a className="home-button primary" href="/signup">Create account</a>
+          <Link className="home-link" to="/login">Log in</Link>
+          <Link className="home-button primary" to="/signup">Create account</Link>
         </div>
       </header>
 
@@ -28,8 +29,8 @@ const Home: React.FC = () => {
             and reliable patient outcomes. Track requests, results, and case history in one place.
           </p>
           <div className="home-cta-row">
-            <a className="home-button primary" href="/signup">Get started</a>
-            <a className="home-button ghost" href="/login">Log in</a>
+            <Link className="home-button primary" to="/signup">Get started</Link>
+            <Link className="home-button ghost" to="/login">Log in</Link>
           </div>
           <div className="home-microcopy">
             HIPAA-style audit logs, role-based access, and secure storage included.
@@ -74,19 +75,19 @@ const Home: React.FC = () => {
             <div className="home-role-icon">P</div>
             <h3>Patient</h3>
             <p>Book appointments, view reports, track case updates, and stay informed.</p>
-            <a className="home-button subtle" href="/signup">Join as patient</a>
+            <Link className="home-button subtle" to="/signup">Join as patient</Link>
           </div>
           <div className="home-role-card">
             <div className="home-role-icon">D</div>
             <h3>Doctor</h3>
             <p>Create cases, prescribe treatment, request labs, and follow up on recovery.</p>
-            <a className="home-button subtle" href="/signup">Join as doctor</a>
+            <Link className="home-button subtle" to="/signup">Join as doctor</Link>
           </div>
           <div className="home-role-card">
             <div className="home-role-icon">L</div>
             <h3>Laboratory</h3>
             <p>Manage requests, track samples, upload results, and notify stakeholders.</p>
-            <a className="home-button subtle" href="/signup">Join as lab</a>
+            <Link className="home-button subtle" to="/signup">Join as lab</Link>
           </div>
         </div>
       </section>
@@ -111,7 +112,7 @@ const Home: React.FC = () => {
               <li>Prescription templates and exports</li>
               <li>Priority clinical support</li>
             </ul>
-            <a className="home-button primary" href="/signup">Start Doctor Pro</a>
+            <Link className="home-button primary" to="/signup">Start Doctor Pro</Link>
           </div>
 
           <div className="home-plan-card highlight">
@@ -125,7 +126,7 @@ const Home: React.FC = () => {
               <li>Compliance-ready reporting</li>
               <li>Dedicated lab success manager</li>
             </ul>
-            <a className="home-button primary" href="/signup">Start Lab Plus</a>
+            <Link className="home-button primary" to="/signup">Start Lab Plus</Link>
           </div>
         </div>
       </section>
@@ -136,8 +137,8 @@ const Home: React.FC = () => {
           <div className="home-footer-sub">Get started in minutes or talk to our team.</div>
         </div>
         <div className="home-cta-row">
-          <a className="home-button primary" href="/signup">Create account</a>
-          <a className="home-button ghost" href="/login">Log in</a>
+          <Link className="home-button primary" to="/signup">Create account</Link>
+          <Link className="home-button ghost" to="/login">Log in</Link>
         </div>
       </section>
     </div>

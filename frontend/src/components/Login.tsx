@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { dashboardPathForRole, useAuth, UserRole } from '../auth';
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,22 +24,12 @@ const Login: React.FC = () => {
       const accessToken: string = tokenResponse.data.access;
       const refreshToken: string = tokenResponse.data.refresh;
 
-      localStorage.setItem('token', accessToken);
-      localStorage.setItem('refresh', refreshToken);
-
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
       const userResponse = await axios.get('/api/users/me/');
-      const realRole = userResponse.data.role;
-
-      let dashboardPath = '/';
-      if (realRole === 'patient') dashboardPath = '/patient-dashboard';
-      else if (realRole === 'doctor') dashboardPath = '/doctor/dashboard';
-      else if (realRole === 'lab_staff' || realRole === 'lab') {
-        dashboardPath = '/lab-dashboard';
-      }
-
-      window.location.href = dashboardPath;
+      const realRole = userResponse.data.role as UserRole;
+      signIn(accessToken, refreshToken, realRole);
+      navigate(dashboardPathForRole(realRole), { replace: true });
     } catch (error: any) {
       alert(
         `Login failed: ${
@@ -104,7 +98,8 @@ const Login: React.FC = () => {
             </button>
 
             <div className="login-footer">
-              Don&apos;t have an account? <a href="/signup">Sign up</a>
+              <Link to="/forgot-password">Forgot password?</Link><br />
+              Don&apos;t have an account? <Link to="/signup">Sign up</Link>
             </div>
           </form>
         </div>

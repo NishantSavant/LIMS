@@ -19,6 +19,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.auth-message { color: #166534; }
+.auth-error { color: #b91c1c; margin-top: 12px; }
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

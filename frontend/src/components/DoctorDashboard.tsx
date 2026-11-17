@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserRound, ClipboardList, CalendarCheck, FileText } from 'lucide-react';
+import { useAuth } from '../auth';
 
 interface DoctorUser {
   id: number;
@@ -48,6 +49,7 @@ interface FollowupTask {
 
 const DoctorDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [user, setUser] = useState<DoctorUser | null>(null);
   const [profile, setProfile] = useState<DoctorProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -87,7 +89,8 @@ const DoctorDashboard: React.FC = () => {
         ]);
 
         if (userRes.data.role !== 'doctor') {
-          navigate('/login');
+          signOut();
+          navigate('/login', { replace: true });
           return;
         }
 
@@ -100,14 +103,15 @@ const DoctorDashboard: React.FC = () => {
         setNotifications(Array.isArray(notifRes.data) ? notifRes.data : []);
         setFollowups(Array.isArray(followupRes.data) ? followupRes.data : []);
       } catch {
-        navigate('/login');
+        signOut();
+        navigate('/login', { replace: true });
       }
     };
 
     loadAll();
     const interval = setInterval(loadAll, 15000);
     return () => clearInterval(interval);
-  }, [token]);
+  }, [token, signOut, navigate]);
 
   const handleAcceptAppointment = async (id: number) => {
     if (!token) return;

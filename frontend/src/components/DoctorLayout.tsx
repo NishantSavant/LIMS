@@ -1,25 +1,18 @@
 // src/layouts/DoctorLayout.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
-import axios from 'axios';
+import { useAuth } from '../auth';
 
 const DoctorLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const needsTopOffset = !location.pathname.endsWith('/dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const token = localStorage.getItem('token');
-
-  useEffect(() => {
-    if (!token) {
-      navigate('/login', { replace: true });
-    }
-  }, [token, navigate]);
+  const { signOut } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    signOut();
     navigate('/login', { replace: true });
   };
 

@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FileText, Pill, PillBottle } from 'lucide-react';
+import { useAuth } from '../auth';
 
 interface MeUser {
   id: number;
@@ -82,6 +83,7 @@ interface NotificationItem {
 
 const PatientDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [user, setUser] = useState<MeUser | null>(null);
   const [profile, setProfile] = useState<PatientProfile | null>(null);
   const [appointments, setAppointments] = useState<DashboardAppointment[]>([]);
@@ -127,6 +129,7 @@ const PatientDashboard: React.FC = () => {
         ]);
 
         if (userRes.data.role !== 'patient') {
+          signOut();
           navigate('/login', { replace: true });
           return;
         }
@@ -168,7 +171,7 @@ const PatientDashboard: React.FC = () => {
         timelineResults.forEach((entry) => { timelineMap[entry.caseId] = entry.events; });
         setCaseTimeline(timelineMap);
       } catch {
-        localStorage.removeItem('token');
+        signOut();
         navigate('/login', { replace: true });
       } finally {
         setLoading(false);
@@ -178,7 +181,7 @@ const PatientDashboard: React.FC = () => {
     loadAll();
     const interval = setInterval(loadAll, 15000);
     return () => clearInterval(interval);
-  }, [token, navigate]);
+  }, [token, navigate, signOut]);
 
   const markNotificationRead = async (id: number) => {
     if (!token) return;
